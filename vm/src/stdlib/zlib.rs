@@ -14,7 +14,6 @@ mod decl {
     use crate::{IntoPyRef, PyResult, PyValue, StaticType};
 
     use adler32::RollingAdler32 as Adler32;
-    use crc32fast::Hasher as Crc32;
     use crossbeam_utils::atomic::AtomicCell;
     use flate2::{
         write::ZlibEncoder, Compress, Compression, Decompress, FlushCompress, FlushDecompress,
@@ -79,13 +78,7 @@ mod decl {
     /// Compute a CRC-32 checksum of data.
     #[pyfunction]
     fn crc32(data: ArgBytesLike, begin_state: OptionalArg<PyIntRef>) -> u32 {
-        data.with_ref(|data| {
-            let begin_state = begin_state.map_or(0, |i| int::bigint_unsigned_mask(i.as_bigint()));
-
-            let mut hasher = Crc32::new_with_initial(begin_state);
-            hasher.update(data);
-            hasher.finalize()
-        })
+        crate::stdlib::binascii::crc32(data, begin_state)
     }
 
     fn compression_from_int(level: Option<i32>) -> Option<Compression> {

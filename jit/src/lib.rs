@@ -11,6 +11,7 @@ mod instructions;
 
 use instructions::FunctionCompiler;
 use std::convert::TryFrom;
+use std::mem::ManuallyDrop;
 
 #[derive(Debug, thiserror::Error)]
 pub enum JitCompileError {
@@ -83,8 +84,12 @@ impl Jit {
             &self.ctx.func.signature,
         )?;
 
-        self.module
-            .define_function(id, &mut self.ctx, &mut codegen::binemit::NullTrapSink {})?;
+        self.module.define_function(
+            id,
+            &mut self.ctx,
+            &mut codegen::binemit::NullTrapSink {},
+            &mut codegen::binemit::NullStackMapSink {},
+        )?;
 
         self.module.clear_context(&mut self.ctx);
 
@@ -106,14 +111,14 @@ pub fn compile<C: bytecode::Constant>(
     Ok(CompiledCode {
         sig,
         code,
-        module: jit.module,
+        module: ManuallyDrop::new(jit.module),
     })
 }
 
 pub struct CompiledCode {
     sig: JitSig,
     code: *const u8,
-    module: JITModule,
+    module: ManuallyDrop<JITModule>,
 }
 
 impl CompiledCode {
@@ -288,7 +293,7 @@ unsafe impl Sync for CompiledCode {}
 impl Drop for CompiledCode {
     fn drop(&mut self) {
         // SAFETY: The only pointer that this memory will also be dropped now
-        unsafe { self.module.free_memory() }
+        unsafe { ManuallyDrop::take(&mut self.module).free_memory() }
     }
 }
 

@@ -35,7 +35,6 @@ mod array {
     use crate::{IntoPyResult, VirtualMachine};
     use crossbeam_utils::atomic::AtomicCell;
     use itertools::Itertools;
-    use lexical_core::Integer;
     use num_traits::ToPrimitive;
     use std::cmp::Ordering;
     use std::convert::{TryFrom, TryInto};
@@ -1261,7 +1260,8 @@ mod array {
                 .ok_or_else(|| {
                     vm.new_overflow_error("Python int too large to convert to C int".into())
                 })?
-                .try_u8_or_max()
+                .to_u8()
+                .unwrap_or(u8::MAX)
                 .try_into()
                 .map_err(|_| {
                     vm.new_value_error("third argument must be a valid machine format code.".into())

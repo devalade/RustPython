@@ -1,16 +1,17 @@
 pub(crate) use decl::make_module;
 
+pub(super) use decl::crc32;
+
 #[pymodule(name = "binascii")]
 mod decl {
     use crate::builtins::bytearray::{PyByteArray, PyByteArrayRef};
     use crate::builtins::bytes::{PyBytes, PyBytesRef};
     use crate::builtins::pystr::{PyStr, PyStrRef};
-    use crate::builtins::PyTypeRef;
+    use crate::builtins::{int, PyIntRef, PyTypeRef};
     use crate::byteslike::ArgBytesLike;
     use crate::function::OptionalArg;
     use crate::vm::VirtualMachine;
     use crate::{PyObjectRef, PyResult, TryFromObject, TypeProtocol};
-    use crc::{crc32, Hasher32};
     use itertools::Itertools;
 
     enum SerializedData {
@@ -136,13 +137,14 @@ mod decl {
     }
 
     #[pyfunction]
-    fn crc32(data: SerializedData, value: OptionalArg<u32>, vm: &VirtualMachine) -> PyResult {
-        let crc = value.unwrap_or(0);
+    pub(in crate::stdlib) fn crc32(data: ArgBytesLike, init: OptionalArg<PyIntRef>) -> u32 {
+        let init = init.map_or(0, |i| int::bigint_unsigned_mask(i.as_bigint()));
 
-        let mut digest = crc32::Digest::new_with_initial(crc32::IEEE, crc);
-        data.with_ref(|bytes| digest.write(bytes));
-
-        Ok(vm.ctx.new_int(digest.sum32()))
+        let mut hasher = crc32fast::Hasher::new_with_initial(init);
+        data.with_ref(|bytes| {
+            hasher.update(bytes);
+            hasher.finalize()
+        })
     }
 
     #[derive(FromArgs)]

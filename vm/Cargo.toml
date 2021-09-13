@@ -57,13 +57,12 @@ serde = { version = "1.0.66", features = ["derive"] }
 puruspe = "0.1"
 caseless = "0.2.1"
 chrono = { version = "0.4", features = ["wasmbind"] }
-lexical-core = "0.7"
+lexical-parse-float = "0.8.0"
 itertools = "0.10.0"
 hex = "0.4.0"
-hexf-parse = "0.1.0"
+hexf-parse = "0.2.1"
 indexmap = "1.0.2"
 ahash = "0.7.2"
-crc = "^1.0.0"
 bitflags = "1.2.1"
 libc = "0.2.99"
 nix = "0.22.1"
@@ -141,7 +140,7 @@ termios = "0.3"
 system-configuration = "0.4"
 
 [target.'cfg(windows)'.dependencies]
-winreg = "0.8.0"
+winreg = "0.10.1"
 schannel = "0.1"
 widestring = "0.4"
 
