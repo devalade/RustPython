@@ -451,11 +451,6 @@ class ArrayBinASCIITest(BinASCIITest):
 
     # TODO: RUSTPYTHON
     @unittest.expectedFailure
-    def test_crc32(self):
-        super().test_crc32()
-
-    # TODO: RUSTPYTHON
-    @unittest.expectedFailure
     def test_base64valid(self):
         super().test_base64valid()
 
@@ -466,11 +461,6 @@ class BytearrayBinASCIITest(BinASCIITest):
 
 class MemoryviewBinASCIITest(BinASCIITest):
     type2test = memoryview
-
-    # TODO: RUSTPYTHON
-    @unittest.expectedFailure
-    def test_crc32(self):
-        super().test_crc32()
 
     # TODO: RUSTPYTHON
     @unittest.expectedFailure
